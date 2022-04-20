@@ -45,8 +45,12 @@ document.addEventListener(
   function () {
     initPopup();
 
-    const popupConfirmedTime = localStorage.getItem("popupConfirmedTime");
+    // get saved time from localStorage and convert it to Date object
+    const popupConfirmedTime = new Date(
+      localStorage.getItem("popupConfirmedTime")
+    );
     if (popupConfirmedTime) {
+      // add 10 minutes to popupConfirmedTime
       const popupConfirmedValidity = new Date(
         popupConfirmedTime.getTime() + 10 * 60000
       );

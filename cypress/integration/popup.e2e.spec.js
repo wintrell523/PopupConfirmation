@@ -20,7 +20,14 @@ describe("Popup", () => {
     cy.get("h1").should("be.visible");
   });
 
-  it.skip("should be not shown when page is reloaded after confirmation", () => {});
+  it("should be not shown when page is reloaded after confirmation", () => {
+    cy.get("#popup").should("be.visible");
+    cy.get("button").contains("confirm").click();
+    cy.get("#popup").should("not.be.visible");
+
+    cy.reload();
+    cy.get("#popup").should("not.be.visible");
+  });
 
   it.skip("should be not shown when page is loaded but it was already confirmed in past 10 minutes", () => {});
 
