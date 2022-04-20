@@ -1,10 +1,21 @@
 # Popup confirmation
 
 ## Install dependencies
-```npm install```
+
+`npm install`
+
 ## Run sandbox
-```npm start```
+
+`npm start`
+
 Visit http://localhost:4000/
 
 ## Run e2e tests
-```npm test```
+
+### Headless
+
+`npm run cy:run`
+
+### GUI
+
+`npm run cy:open`

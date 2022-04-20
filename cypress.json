@@ -1,0 +1,7 @@
+{
+  "watchForFileChanges": false,
+  "viewportWidth": 1600,
+  "viewportHeight": 1400,
+  "failOnStatusCode": false,
+  "chromeWebSecurity": false
+}
