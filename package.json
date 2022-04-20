@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node index.js",
     "cy:open": "cypress open",
-    "cy:run": "cypress run"
+    "cy:run": "cypress run",
+    "dev": "start-test 4000 cy:open",
+    "test": "start-test 4000 cy:run"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +17,7 @@
     "express": "^4.17.1"
   },
   "devDependencies": {
-    "cypress": "^9.5.4"
+    "cypress": "^9.5.4",
+    "start-server-and-test": "^1.14.0"
   }
 }
