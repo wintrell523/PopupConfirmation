@@ -1,46 +1,62 @@
-
 function initPopup() {
-    const popupWrapper = document.createElement('div')
-    popupWrapper.setAttribute('class', 'modal')
-    popupWrapper.setAttribute('id', 'popup')
-    popupWrapper.addEventListener('click', hidePopup)
+  const popupWrapper = document.createElement("div");
+  popupWrapper.setAttribute("class", "modal");
+  popupWrapper.setAttribute("id", "popup");
+  popupWrapper.addEventListener("click", hidePopup);
 
-    const content = document.createElement('div')
-    content.setAttribute('class','modal-content')
-    
-    const confirmationButton = document.createElement('button')
-    confirmationButton.addEventListener('click', handleConfirmation)
-    confirmationButton.innerHTML = "confirm"
+  const content = document.createElement("div");
+  content.setAttribute("class", "modal-content");
 
-    const message = document.createElement('div')
-    message.innerHTML = "<h2>Please confirm that you read this.</h2>"
+  const confirmationButton = document.createElement("button");
+  confirmationButton.addEventListener("click", handleConfirmation);
+  confirmationButton.innerHTML = "confirm";
 
-    const closeButton = document.createElement('span')
-    closeButton.setAttribute('class', 'close')
-    closeButton.innerHTML = "&times;"
-    closeButton.addEventListener('click', hidePopup)
+  const message = document.createElement("div");
+  message.innerHTML = "<h2>Please confirm that you read this.</h2>";
 
-    content.appendChild(closeButton)
-    content.appendChild(message)
-    content.appendChild(confirmationButton)
-    popupWrapper.appendChild(content)
+  const closeButton = document.createElement("span");
+  closeButton.setAttribute("class", "close");
+  closeButton.innerHTML = "&times;";
+  closeButton.addEventListener("click", hidePopup);
 
-    document.body.appendChild(popupWrapper)
+  content.appendChild(closeButton);
+  content.appendChild(message);
+  content.appendChild(confirmationButton);
+  popupWrapper.appendChild(content);
+
+  document.body.appendChild(popupWrapper);
 }
 
 function showPopup() {
-    document.querySelector('#popup').style.display = "block"
+  document.querySelector("#popup").style.display = "block";
 }
 
 function hidePopup() {
-    document.querySelector('#popup').style.display = "none"
+  document.querySelector("#popup").style.display = "none";
 }
 
 function handleConfirmation() {
-    hidePopup()
+  localStorage.setItem("popupConfirmedTime", new Date());
+  hidePopup();
 }
 
-document.addEventListener('DOMContentLoaded', function(){ 
-    initPopup()
-    showPopup()
-}, false);
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+    initPopup();
+
+    const popupConfirmedTime = localStorage.getItem("popupConfirmedTime");
+    if (popupConfirmedTime) {
+      const popupConfirmedValidity = new Date(
+        popupConfirmedTime.getTime() + 10 * 60000
+      );
+      const now = new Date();
+      if (now.getTime() > popupConfirmedValidity.getTime()) {
+        showPopup();
+      }
+    } else {
+      showPopup();
+    }
+  },
+  false
+);
