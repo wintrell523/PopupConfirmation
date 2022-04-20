@@ -1,7 +1,10 @@
-describe("Demo sites for tracking scripts", () => {
-  it("should display correct heading", async () => {
-    await browser.url(`http://localhost:4000/`);
+import pageContent from "../fixtures/pageContent.json";
 
-    await expect($("h1")).toBeExisting();
+describe("Demo sites for tracking scripts", () => {
+  it("should display correct heading", () => {
+    cy.visit("/");
+
+    cy.get("h1").should("exist").and("have.text", pageContent.heading);
+    cy.get("p").should("have.text", pageContent.paragraph);
   });
 });
