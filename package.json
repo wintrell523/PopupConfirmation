@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "cypress": "^9.5.4",
+    "cypress-localstorage-commands": "^1.7.0",
     "start-server-and-test": "^1.14.0"
   }
 }
