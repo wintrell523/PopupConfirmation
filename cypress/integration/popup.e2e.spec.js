@@ -29,9 +29,20 @@ describe("Popup", () => {
     cy.get("#popup").should("not.be.visible");
   });
 
-  it.skip("should be not shown when page is loaded but it was already confirmed in past 10 minutes", () => {});
-
   it("should display correct text", () => {
     cy.get("#popup").find("h2").should("have.text", popupContent.message);
+  });
+});
+
+describe("Popup with expiry time", () => {
+  it("should be not shown when page is loaded but it was already confirmed in past 10 minutes", () => {
+    cy.addValidConfirmToken("5");
+    cy.visit("/");
+    cy.get("#popup").should("not.be.visible");
+  });
+  it("should be shown when page is loaded and it was confirmed more than 10 minutes ago", () => {
+    cy.addInvalidConfirmToken("5");
+    cy.visit("/");
+    cy.get("#popup").should("be.visible");
   });
 });

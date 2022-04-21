@@ -8,6 +8,18 @@ import "cypress-localstorage-commands";
 // commands please read more here:
 // https://on.cypress.io/custom-commands
 // ***********************************************
+
+Cypress.Commands.add("addValidConfirmToken", (time) => {
+  const date = new Date();
+  const popupConfirmTime = date.getTime() + time * 60000;
+  cy.setLocalStorage("popupConfirmedTime", popupConfirmTime);
+});
+Cypress.Commands.add("addInvalidConfirmToken", (time) => {
+  const date = new Date();
+  const popupConfirmTime = date.getTime() - time * 60000;
+  cy.setLocalStorage("popupConfirmedTime", popupConfirmTime);
+});
+
 //
 //
 // -- This is a parent command --
