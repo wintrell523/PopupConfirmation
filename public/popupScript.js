@@ -11,8 +11,12 @@ function initPopup() {
   confirmationButton.addEventListener("click", handleConfirmation);
   confirmationButton.innerHTML = "confirm";
 
-  const message = document.createElement("div");
-  message.innerHTML = "<h2>Please confirm that you read this.</h2>";
+  const header = document.createElement("div");
+  header.setAttribute("id", "popupHeader");
+  header.innerHTML = "<h2>Please confirm that you read this.</h2>";
+
+  const receivedMessage = document.createElement("p");
+  receivedMessage.setAttribute("id", "popupMessage");
 
   const closeButton = document.createElement("span");
   closeButton.setAttribute("class", "close");
@@ -20,7 +24,8 @@ function initPopup() {
   closeButton.addEventListener("click", hidePopup);
 
   content.appendChild(closeButton);
-  content.appendChild(message);
+  content.appendChild(header);
+  content.appendChild(receivedMessage);
   content.appendChild(confirmationButton);
   popupWrapper.appendChild(content);
 
@@ -44,6 +49,8 @@ document.addEventListener(
   "DOMContentLoaded",
   function () {
     initPopup();
+
+    fetchPopup();
 
     const popupConfirmedTime = getWithExpiry("popupConfirmedTime");
     if (!popupConfirmedTime) {
@@ -76,4 +83,18 @@ function getWithExpiry(key) {
     return null;
   }
   return expiryTime;
+}
+
+function fetchPopup() {
+  fetch("/popup")
+    .then((res) => {
+      if (res.status != 200) {
+        hidePopup();
+        throw new Error("Unsuccessful response");
+      }
+      return res.json();
+    })
+    .then((content) => {
+      document.querySelector("#popupMessage").innerHTML = content.message;
+    });
 }
