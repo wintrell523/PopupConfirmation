@@ -36,7 +36,7 @@ function hidePopup() {
 }
 
 function handleConfirmation() {
-  localStorage.setItem("popupConfirmedTime", new Date());
+  setWithExpiry("popupConfirmedTime", 10);
   hidePopup();
 }
 
@@ -45,22 +45,35 @@ document.addEventListener(
   function () {
     initPopup();
 
-    // get saved time from localStorage and convert it to Date object
-    const popupConfirmedTime = new Date(
-      localStorage.getItem("popupConfirmedTime")
-    );
-    if (popupConfirmedTime) {
-      // add 10 minutes to popupConfirmedTime
-      const popupConfirmedValidity = new Date(
-        popupConfirmedTime.getTime() + 10 * 60000
-      );
-      const now = new Date();
-      if (now.getTime() > popupConfirmedValidity.getTime()) {
-        showPopup();
-      }
-    } else {
+    const popupConfirmedTime = getWithExpiry("popupConfirmedTime");
+    if (!popupConfirmedTime) {
       showPopup();
     }
   },
   false
 );
+
+function setWithExpiry(key, ttl) {
+  const now = new Date();
+  const expiryTime = now.getTime() + ttl * 60000;
+  localStorage.setItem(key, expiryTime);
+}
+
+function getWithExpiry(key) {
+  const expiryTime = localStorage.getItem(key);
+
+  // if the item doesn't exist, return null
+  if (!expiryTime) {
+    return null;
+  }
+  const now = new Date();
+
+  // compare the expiry time of the item with the current time
+  if (now.getTime() > expiryTime) {
+    // If the item is expired, delete the item from storage
+    // and return null
+    localStorage.removeItem(key);
+    return null;
+  }
+  return expiryTime;
+}
