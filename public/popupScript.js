@@ -41,7 +41,7 @@ function hidePopup() {
 }
 
 function handleConfirmation() {
-  setWithExpiry("popupConfirmedTime", 10);
+  confirmPopup();
   hidePopup();
 }
 
@@ -49,9 +49,7 @@ document.addEventListener(
   "DOMContentLoaded",
   function () {
     initPopup();
-
     fetchPopup();
-
     const popupConfirmedTime = getWithExpiry("popupConfirmedTime");
     if (!popupConfirmedTime) {
       showPopup();
@@ -85,6 +83,11 @@ function getWithExpiry(key) {
   return expiryTime;
 }
 
+/**
+ * GET /popup
+ * Show popup if the response is 200
+ * Set the message from response to the popup
+ */
 function fetchPopup() {
   fetch("/popup")
     .then((res) => {
@@ -94,7 +97,29 @@ function fetchPopup() {
       }
       return res.json();
     })
-    .then((content) => {
-      document.querySelector("#popupMessage").innerHTML = content.message;
+    .then((json) => {
+      document.querySelector("#popupMessage").innerHTML = json.message;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+}
+
+/**
+ * POST /popup/confirmation
+ * If the response contains confirmationTracked: true, set confirm token
+ */
+function confirmPopup() {
+  fetch("/popup/confirmation", {
+    method: "POST",
+  })
+    .then((res) => res.json())
+    .then((json) => {
+      if (json.confirmationTracked) {
+        setWithExpiry("popupConfirmedTime", 10);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
     });
 }
