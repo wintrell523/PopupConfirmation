@@ -58,6 +58,7 @@ describe("Popup with expiry time", () => {
     cy.clearLocalStorage();
     cy.clearCookies();
   });
+
   it("should be not shown when page is loaded but it was already confirmed in past 10 minutes", () => {
     cy.addValidConfirmToken("5");
     cy.visit("/");
@@ -147,3 +148,4 @@ describe("Popup requests", () => {
     cy.get("#popup").should("not.be.visible");
   });
 });
+

@@ -8,6 +8,7 @@ function initPopup() {
   content.setAttribute("class", "modal-content");
 
   const confirmationButton = document.createElement("button");
+
   confirmationButton.setAttribute("id", "confirmButton");
   confirmationButton.addEventListener("click", handleConfirmation);
   confirmationButton.innerHTML = "confirm";
@@ -18,6 +19,7 @@ function initPopup() {
 
   const receivedMessage = document.createElement("p");
   receivedMessage.setAttribute("id", "popupMessage");
+
 
   const closeButton = document.createElement("span");
   closeButton.setAttribute("class", "close");
@@ -43,6 +45,7 @@ function hidePopup() {
 
 function handleConfirmation() {
   confirmPopup(); // send post to confirm the popup
+
   hidePopup();
 }
 
@@ -52,6 +55,7 @@ document.addEventListener(
     initPopup(); // init the popup
     fetchPopup(); // get the /popup endpoint
     if (!getWithExpiry("popupConfirmedTime")) {
+
       showPopup();
     }
   },
