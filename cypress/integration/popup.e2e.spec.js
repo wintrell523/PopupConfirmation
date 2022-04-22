@@ -49,7 +49,21 @@ describe("Popup", () => {
   });
 
   it("should display correct text", () => {
-    cy.get("#popup").find("h2").should("have.text", popupContent.message);
+    cy.get("#popup").find("h2").should("have.text", popupContent.heading);
+  });
+
+  it("should display popup after 10 minutes after successul confirmation", () => {
+    cy.visit("/");
+    cy.clock(); // setup clock
+    cy.wait("@getPopup");
+    cy.get("#confirmButton").click();
+    cy.wait("@confirmPopup");
+    cy.get("#popup").should("not.be.visible");
+    cy.tick(300000); // move time 5 minutes forward
+    cy.get("#popup").should("not.be.visible");
+    cy.tick(360000); // move time 6 minutes forward (total 11 and token should not be valid)
+    cy.get("#popup").should("be.visible");
+    cy.getLocalStorage("popupConfirmedTime").should("not.exist");
   });
 });
 
@@ -148,4 +162,3 @@ describe("Popup requests", () => {
     cy.get("#popup").should("not.be.visible");
   });
 });
-
