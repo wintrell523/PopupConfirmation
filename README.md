@@ -4,18 +4,18 @@
 
 `npm install`
 
-## Run sandbox
+## Run sandbox alone
 
 `npm start`
 
 Visit http://localhost:4000/
 
-## Run e2e tests
+## Run e2e tests with server
 
 ### Headless
 
-`npm run cy:run`
+`npm run test`
 
 ### GUI
 
-`npm run cy:open`
+`npm run dev`
