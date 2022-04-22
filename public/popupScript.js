@@ -20,7 +20,6 @@ function initPopup() {
   const receivedMessage = document.createElement("p");
   receivedMessage.setAttribute("id", "popupMessage");
 
-
   const closeButton = document.createElement("span");
   closeButton.setAttribute("class", "close");
   closeButton.innerHTML = "&times;";
@@ -55,9 +54,9 @@ document.addEventListener(
     initPopup(); // init the popup
     fetchPopup(); // get the /popup endpoint
     if (!getWithExpiry("popupConfirmedTime")) {
-
       showPopup();
     }
+    runExpiryCheck();
   },
   false
 );
@@ -121,9 +120,22 @@ function confirmPopup() {
     .then((json) => {
       if (json.confirmationTracked) {
         setWithExpiry("popupConfirmedTime", 10);
+        runExpiryCheck();
       }
     })
     .catch((err) => {
       console.error(err);
     });
+}
+
+/**
+ * Run periodical check if the popupConfirmedTime is expired.
+ * If so, show the popup again.
+ */
+function runExpiryCheck() {
+  if (!getWithExpiry("popupConfirmedTime")) {
+    showPopup();
+  } else {
+    setTimeout(runExpiryCheck, 5000); // check again in a second
+  }
 }
