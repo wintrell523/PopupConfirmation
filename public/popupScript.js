@@ -8,11 +8,18 @@ function initPopup() {
   content.setAttribute("class", "modal-content");
 
   const confirmationButton = document.createElement("button");
+
+  confirmationButton.setAttribute("id", "confirmButton");
   confirmationButton.addEventListener("click", handleConfirmation);
   confirmationButton.innerHTML = "confirm";
 
-  const message = document.createElement("div");
-  message.innerHTML = "<h2>Please confirm that you read this.</h2>";
+  const header = document.createElement("div");
+  header.setAttribute("id", "popupHeader");
+  header.innerHTML = "<h2>Please confirm that you read this.</h2>";
+
+  const receivedMessage = document.createElement("p");
+  receivedMessage.setAttribute("id", "popupMessage");
+
 
   const closeButton = document.createElement("span");
   closeButton.setAttribute("class", "close");
@@ -20,7 +27,8 @@ function initPopup() {
   closeButton.addEventListener("click", hidePopup);
 
   content.appendChild(closeButton);
-  content.appendChild(message);
+  content.appendChild(header);
+  content.appendChild(receivedMessage);
   content.appendChild(confirmationButton);
   popupWrapper.appendChild(content);
 
@@ -36,17 +44,18 @@ function hidePopup() {
 }
 
 function handleConfirmation() {
-  setWithExpiry("popupConfirmedTime", 10);
+  confirmPopup(); // send post to confirm the popup
+
   hidePopup();
 }
 
 document.addEventListener(
   "DOMContentLoaded",
   function () {
-    initPopup();
+    initPopup(); // init the popup
+    fetchPopup(); // get the /popup endpoint
+    if (!getWithExpiry("popupConfirmedTime")) {
 
-    const popupConfirmedTime = getWithExpiry("popupConfirmedTime");
-    if (!popupConfirmedTime) {
       showPopup();
     }
   },
@@ -76,4 +85,45 @@ function getWithExpiry(key) {
     return null;
   }
   return expiryTime;
+}
+
+/**
+ * GET /popup
+ * Show popup if the response is 200
+ * Set the message from response to the popup
+ */
+function fetchPopup() {
+  fetch("/popup")
+    .then((res) => {
+      if (res.status != 200) {
+        hidePopup();
+        throw new Error("Unsuccessful response");
+      }
+      return res.json();
+    })
+    .then((json) => {
+      document.querySelector("#popupMessage").innerHTML = json.message;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+}
+
+/**
+ * POST /popup/confirmation
+ * If the response contains confirmationTracked: true, set confirm token
+ */
+function confirmPopup() {
+  fetch("/popup/confirmation", {
+    method: "POST",
+  })
+    .then((res) => res.json())
+    .then((json) => {
+      if (json.confirmationTracked) {
+        setWithExpiry("popupConfirmedTime", 10);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 }

@@ -1,0 +1,6 @@
+{
+  "getPopup": {
+    "messageHTML": "<p>This is a test message for Cypress test.</p>",
+    "message": "This is a test message for Cypress test."
+  }
+}
