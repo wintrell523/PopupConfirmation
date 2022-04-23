@@ -35,7 +35,9 @@ function initPopup() {
 }
 
 function showPopup() {
-  fetchPopup();
+  fetchPopup().catch((err) => {
+    err.message;
+  });
   document.querySelector("#popup").style.display = "block";
 }
 
@@ -50,7 +52,9 @@ function hidePopupUnconfirmed() {
 }
 
 function handleConfirmation() {
-  const confirmationReqStatus = confirmPopup(); // send post to confirm the popup
+  const confirmationReqStatus = confirmPopup().catch((err) => {
+    err.message;
+  }); // send post to confirm the popup
   // hide popup with confirmed or unconfirmed status depending on the response code
   if (confirmationReqStatus) {
     hidePopupConfirmed();
@@ -100,41 +104,29 @@ function getWithExpiry(key) {
  * Show popup if the response is 200
  * Set the message from response to the popup
  */
-function fetchPopup() {
-  fetch("/popup")
-    .then((res) => {
-      if (res.status != 200) {
-        hidePopupUnconfirmed();
-        throw new Error("Unsuccessful response");
-      }
-      return res.json();
-    })
-    .then((json) => {
-      document.querySelector("#popupMessage").innerHTML = json.message;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
+async function fetchPopup() {
+  const fetchPopup = await fetch("/popup");
+  if (!fetchPopup.ok) {
+    hidePopupUnconfirmed();
+    return;
+  }
+  const fetchPopupJson = await fetchPopup.json();
+  document.querySelector("#popupMessage").innerHTML = fetchPopupJson.message;
 }
 
 /**
  * POST /popup/confirmation
  * If the response contains confirmationTracked: true, set confirm token
  */
-function confirmPopup() {
-  fetch("/popup/confirmation", {
+async function confirmPopup() {
+  const popupConfirm = await fetch("/popup/confirmation", {
     method: "POST",
-  })
-    .then((res) => res.json())
-    .then((json) => {
-      if (json.confirmationTracked) {
-        setWithExpiry("popupConfirmedTime", 10);
-        return json.confirmationTracked;
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-    });
+  });
+  const popupConfirmJson = await popupConfirm.json();
+  if (popupConfirmJson.confirmationTracked) {
+    setWithExpiry("popupConfirmedTime", 10);
+    return popupConfirmJson.confirmationTracked;
+  }
 }
 
 /**
