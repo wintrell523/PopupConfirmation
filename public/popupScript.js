@@ -2,7 +2,7 @@ function initPopup() {
   const popupWrapper = document.createElement("div");
   popupWrapper.setAttribute("class", "modal");
   popupWrapper.setAttribute("id", "popup");
-  popupWrapper.addEventListener("click", hidePopup);
+  popupWrapper.addEventListener("click", hidePopupUnconfirmed);
 
   const content = document.createElement("div");
   content.setAttribute("class", "modal-content");
@@ -23,7 +23,7 @@ function initPopup() {
   const closeButton = document.createElement("span");
   closeButton.setAttribute("class", "close");
   closeButton.innerHTML = "&times;";
-  closeButton.addEventListener("click", hidePopup);
+  closeButton.addEventListener("click", hidePopupUnconfirmed);
 
   content.appendChild(closeButton);
   content.appendChild(header);
@@ -35,28 +35,37 @@ function initPopup() {
 }
 
 function showPopup() {
+  fetchPopup();
   document.querySelector("#popup").style.display = "block";
 }
 
-function hidePopup() {
+function hidePopupConfirmed() {
+  document.querySelector("#popup").style.display = "none";
+}
+
+function hidePopupUnconfirmed() {
+  // if the popup is not confirmed and only closed, show it again in 10 minutes
+  runPopupTimer();
   document.querySelector("#popup").style.display = "none";
 }
 
 function handleConfirmation() {
-  confirmPopup(); // send post to confirm the popup
-
-  hidePopup();
+  const confirmationReqStatus = confirmPopup(); // send post to confirm the popup
+  // hide popup with confirmed or unconfirmed status depending on the response code
+  if (confirmationReqStatus) {
+    hidePopupConfirmed();
+  } else {
+    hidePopupUnconfirmed();
+  }
 }
 
 document.addEventListener(
   "DOMContentLoaded",
   function () {
     initPopup(); // init the popup
-    fetchPopup(); // get the /popup endpoint
     if (!getWithExpiry("popupConfirmedTime")) {
       showPopup();
     }
-    runExpiryCheck();
   },
   false
 );
@@ -95,7 +104,7 @@ function fetchPopup() {
   fetch("/popup")
     .then((res) => {
       if (res.status != 200) {
-        hidePopup();
+        hidePopupUnconfirmed();
         throw new Error("Unsuccessful response");
       }
       return res.json();
@@ -120,7 +129,7 @@ function confirmPopup() {
     .then((json) => {
       if (json.confirmationTracked) {
         setWithExpiry("popupConfirmedTime", 10);
-        runExpiryCheck();
+        return json.confirmationTracked;
       }
     })
     .catch((err) => {
@@ -129,13 +138,10 @@ function confirmPopup() {
 }
 
 /**
- * Run periodical check if the popupConfirmedTime is expired.
- * If so, show the popup again.
+ * Timer for 10 minutes for the case that the popup was closed without confirmation.
+ * After 10 minutes the popup is opened again.
  */
-function runExpiryCheck() {
-  if (!getWithExpiry("popupConfirmedTime")) {
-    showPopup();
-  } else {
-    setTimeout(runExpiryCheck, 5000); // check again in a second
-  }
+function runPopupTimer() {
+  setTimeout(showPopup, 600000); // check again in a second
+  console.log("TIMER SET");
 }

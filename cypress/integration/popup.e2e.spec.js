@@ -1,7 +1,7 @@
 import popupContent from "../fixtures/popupContent.json";
 import popupRequests from "../fixtures/popupRequests.json";
 
-describe("Popup", () => {
+describe("Popup basic tests", () => {
   before(() => {
     cy.clearLocalStorage();
     cy.clearCookies();
@@ -39,7 +39,7 @@ describe("Popup", () => {
     cy.get("h1").should("be.visible");
   });
 
-  it("should be not shown when page is reloaded after confirmation", () => {
+  it("should not be shown when page is reloaded after confirmation", () => {
     cy.get("#popup").should("be.visible");
     cy.get("button").contains("confirm").click();
     cy.get("#popup").should("not.be.visible");
@@ -50,20 +50,6 @@ describe("Popup", () => {
 
   it("should display correct text", () => {
     cy.get("#popup").find("h2").should("have.text", popupContent.heading);
-  });
-
-  it("should display popup after 10 minutes after successul confirmation", () => {
-    cy.visit("/");
-    cy.clock(); // setup clock
-    cy.wait("@getPopup");
-    cy.get("#confirmButton").click();
-    cy.wait("@confirmPopup");
-    cy.get("#popup").should("not.be.visible");
-    cy.tick(300000); // move time 5 minutes forward
-    cy.get("#popup").should("not.be.visible");
-    cy.tick(360000); // move time 6 minutes forward (total 11 and token should not be valid)
-    cy.get("#popup").should("be.visible");
-    cy.getLocalStorage("popupConfirmedTime").should("not.exist");
   });
 });
 
@@ -160,5 +146,68 @@ describe("Popup requests", () => {
     cy.wait("@postConfirmation");
     cy.getLocalStorage("popupConfirmedTime").should("not.exist");
     cy.get("#popup").should("not.be.visible");
+  });
+});
+
+describe("Showing popup without refresh", () => {
+  beforeEach(() => {
+    cy.clearLocalStorage();
+    cy.clearCookies();
+  });
+  it("should display popup after 10 minutes after closing the popup without confirmation", () => {
+    // mock GET status to always be 200
+    cy.intercept("GET", "/popup", {
+      statusCode: 200,
+      body: {
+        message: `${popupRequests.getPopup.messageHTML}`,
+      },
+    }).as("getPopup");
+    // mock POST status to always be 200
+    cy.intercept("POST", "/popup/confirmation", {
+      statusCode: 200,
+      body: {
+        confirmationTracked: true,
+      },
+    }).as("confirmPopup");
+
+    cy.visit("/");
+    cy.clock(); // setup clock
+    cy.wait("@getPopup");
+    cy.get(".modal-content").click();
+    cy.get("#popup").should("not.be.visible");
+    cy.tick(300000); // move time 5 minutes forward
+    cy.get("#popup").should("not.be.visible");
+    cy.tick(360000); // move time 6 minutes forward (total 11 and token should not be valid)
+    cy.get("#popup").should("be.visible");
+    cy.getLocalStorage("popupConfirmedTime").should("not.exist");
+  });
+
+  it("should display popup after 10 minutes after closing the popup with unsuccessful confirmation", () => {
+    // mock GET status to always be 200
+    cy.intercept("GET", "/popup", {
+      statusCode: 200,
+      body: {
+        message: `${popupRequests.getPopup.messageHTML}`,
+      },
+    }).as("getPopup");
+    // mock POST status to always be 500
+    cy.intercept("POST", "/popup/confirmation", {
+      statusCode: 500,
+      body: {
+        confirmationTracked: false,
+      },
+    }).as("confirmPopup");
+
+    cy.visit("/");
+    cy.clock(); // setup clock
+    cy.wait("@getPopup");
+    cy.get("#confirmButton").click();
+    cy.wait("@confirmPopup");
+    cy.get("#popup").should("not.be.visible");
+    cy.tick(300000); // move time 5 minutes forward
+    cy.get("#popup").should("not.be.visible");
+    cy.tick(360000); // move time 6 minutes forward (total 11 and token should not be valid)
+    cy.get("#popup").should("be.visible");
+    cy.getLocalStorage("popupConfirmedTime").should("not.exist");
   });
 });
