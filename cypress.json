@@ -3,5 +3,6 @@
   "watchForFileChanges": false,
   "viewportWidth": 1600,
   "viewportHeight": 1400,
-  "chromeWebSecurity": false
+  "chromeWebSecurity": false,
+  "$schema": "https://on.cypress.io/cypress.schema.json"
 }
